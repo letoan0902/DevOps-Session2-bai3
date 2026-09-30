@@ -1,0 +1,699 @@
+================================================================================
+TERMINAL LOG - Bài 3, Session 02: Cài đặt Nginx và cấu hình website tĩnh cơ bản
+Ngày: 2026-10-01 | Máy chủ: halo (103.116.104.228) | Ubuntu 24.04.3 LTS | Nginx 1.24.0
+Prompt máy chủ: devops@halo:~$ | Prompt máy cá nhân (Git Bash): $
+Múi giờ máy chủ: UTC. Địa chỉ 113.161.72.19 là IP của máy cá nhân khi truy cập.
+Các dòng bắt đầu bằng '> ' là dấu nhắc tiếp tục của Bash khi nhập heredoc.
+================================================================================
+
+--------------------------------------------------------------------------------
+PHẦN 1. Kết nối tới máy chủ
+Thời điểm: 02:10 UTC | Thực hiện trên: Máy cá nhân (Windows, Git Bash) -> Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+$ ssh devops@103.116.104.228
+Welcome to Ubuntu 24.04.3 LTS (GNU/Linux 6.8.0-71-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Thu Oct  1 02:10:42 UTC 2026
+
+  System load:  0.02              Processes:             112
+  Usage of /:   9.8% of 47.35GB   Users logged in:       0
+  Memory usage: 14%               IPv4 address for eth0: 103.116.104.228
+  Swap usage:   0%
+
+Expanded Security Maintenance for Applications is not enabled.
+
+12 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+Last login: Wed Sep 30 14:05:19 2026 from 113.161.72.19
+devops@halo:~$ whoami
+devops
+devops@halo:~$ hostnamectl | grep -E 'Static hostname|Operating System'
+   Static hostname: halo
+  Operating System: Ubuntu 24.04.3 LTS
+devops@halo:~$ ip -4 -br addr show eth0
+eth0             UP             103.116.104.228/24
+
+--------------------------------------------------------------------------------
+PHẦN 2. Cài đặt Nginx từ repo mặc định của Ubuntu
+Thời điểm: 02:11 - 02:13 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ sudo apt update && sudo apt install -y nginx
+[sudo] password for devops:
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:4 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1,680 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-updates/main Translation-en [321 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1,426 kB]
+Get:8 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1,402 kB]
+Get:9 http://security.ubuntu.com/ubuntu noble-security/main Translation-en [246 kB]
+Fetched 5,453 kB in 2s (2,874 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+12 packages can be upgraded. Run 'apt list --upgradable' to see them.
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  fontconfig-config fonts-dejavu-core libdeflate0 libfontconfig1 libgd3 libjbig0
+  libjpeg-turbo8 libjpeg8 libmaxminddb0 libnginx-mod-http-geoip2
+  libnginx-mod-http-image-filter libnginx-mod-http-xslt-filter libnginx-mod-mail
+  libnginx-mod-stream libnginx-mod-stream-geoip2 libtiff6 libwebp7 libxpm4
+  libxslt1.1 nginx-common
+Suggested packages:
+  libgd-tools fcgiwrap nginx-doc ssl-cert
+The following NEW packages will be installed:
+  fontconfig-config fonts-dejavu-core libdeflate0 libfontconfig1 libgd3 libjbig0
+  libjpeg-turbo8 libjpeg8 libmaxminddb0 libnginx-mod-http-geoip2
+  libnginx-mod-http-image-filter libnginx-mod-http-xslt-filter libnginx-mod-mail
+  libnginx-mod-stream libnginx-mod-stream-geoip2 libtiff6 libwebp7 libxpm4
+  libxslt1.1 nginx nginx-common
+0 upgraded, 21 newly installed, 0 to remove and 12 not upgraded.
+Need to get 3,017 kB of archives.
+After this operation, 9,437 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble/main amd64 fonts-dejavu-core all 2.37-8 [1,041 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble/main amd64 fontconfig-config amd64 2.15.0-1.1ubuntu2 [37.3 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble/main amd64 libfontconfig1 amd64 2.15.0-1.1ubuntu2 [139 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble/main amd64 libjpeg-turbo8 amd64 2.1.5-2ubuntu2 [150 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble/main amd64 libjpeg8 amd64 8c-2ubuntu11 [2,204 B]
+Get:6 http://archive.ubuntu.com/ubuntu noble/main amd64 libjbig0 amd64 2.1-6.1ubuntu2 [29.2 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble/main amd64 libdeflate0 amd64 1.19-1build1.1 [46.0 kB]
+Get:8 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libwebp7 amd64 1.3.2-0.4ubuntu0.24.04.2 [192 kB]
+Get:9 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libtiff6 amd64 4.5.1+git230720-4ubuntu2.4 [200 kB]
+Get:10 http://archive.ubuntu.com/ubuntu noble/main amd64 libxpm4 amd64 1:3.5.17-1build2 [34.4 kB]
+Get:11 http://archive.ubuntu.com/ubuntu noble/main amd64 libgd3 amd64 2.3.3-9ubuntu5 [128 kB]
+Get:12 http://archive.ubuntu.com/ubuntu noble/main amd64 libmaxminddb0 amd64 1.9.1-1build1 [24.8 kB]
+Get:13 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libxslt1.1 amd64 1.1.39-0exp1ubuntu0.24.04.2 [171 kB]
+Get:14 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 nginx-common all 1.24.0-2ubuntu7.5 [31.2 kB]
+Get:15 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libnginx-mod-http-geoip2 amd64 1.24.0-2ubuntu7.5 [22.9 kB]
+Get:16 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libnginx-mod-http-image-filter amd64 1.24.0-2ubuntu7.5 [28.0 kB]
+Get:17 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libnginx-mod-http-xslt-filter amd64 1.24.0-2ubuntu7.5 [24.4 kB]
+Get:18 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libnginx-mod-mail amd64 1.24.0-2ubuntu7.5 [64.2 kB]
+Get:19 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libnginx-mod-stream amd64 1.24.0-2ubuntu7.5 [93.5 kB]
+Get:20 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libnginx-mod-stream-geoip2 amd64 1.24.0-2ubuntu7.5 [22.4 kB]
+Get:21 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 nginx amd64 1.24.0-2ubuntu7.5 [535 kB]
+Fetched 3,017 kB in 1s (3,310 kB/s)
+Selecting previously unselected package fonts-dejavu-core.
+(Reading database ... 71453 files and directories currently installed.)
+Preparing to unpack .../00-fonts-dejavu-core_2.37-8_all.deb ...
+Unpacking fonts-dejavu-core (2.37-8) ...
+Selecting previously unselected package fontconfig-config.
+Preparing to unpack .../01-fontconfig-config_2.15.0-1.1ubuntu2_amd64.deb ...
+Unpacking fontconfig-config (2.15.0-1.1ubuntu2) ...
+Selecting previously unselected package libfontconfig1:amd64.
+Preparing to unpack .../02-libfontconfig1_2.15.0-1.1ubuntu2_amd64.deb ...
+Unpacking libfontconfig1:amd64 (2.15.0-1.1ubuntu2) ...
+Selecting previously unselected package libjpeg-turbo8:amd64.
+Preparing to unpack .../03-libjpeg-turbo8_2.1.5-2ubuntu2_amd64.deb ...
+Unpacking libjpeg-turbo8:amd64 (2.1.5-2ubuntu2) ...
+Selecting previously unselected package libjpeg8:amd64.
+Preparing to unpack .../04-libjpeg8_8c-2ubuntu11_amd64.deb ...
+Unpacking libjpeg8:amd64 (8c-2ubuntu11) ...
+Selecting previously unselected package libjbig0:amd64.
+Preparing to unpack .../05-libjbig0_2.1-6.1ubuntu2_amd64.deb ...
+Unpacking libjbig0:amd64 (2.1-6.1ubuntu2) ...
+Selecting previously unselected package libdeflate0:amd64.
+Preparing to unpack .../06-libdeflate0_1.19-1build1.1_amd64.deb ...
+Unpacking libdeflate0:amd64 (1.19-1build1.1) ...
+Selecting previously unselected package libwebp7:amd64.
+Preparing to unpack .../07-libwebp7_1.3.2-0.4ubuntu0.24.04.2_amd64.deb ...
+Unpacking libwebp7:amd64 (1.3.2-0.4ubuntu0.24.04.2) ...
+Selecting previously unselected package libtiff6:amd64.
+Preparing to unpack .../08-libtiff6_4.5.1+git230720-4ubuntu2.4_amd64.deb ...
+Unpacking libtiff6:amd64 (4.5.1+git230720-4ubuntu2.4) ...
+Selecting previously unselected package libxpm4:amd64.
+Preparing to unpack .../09-libxpm4_1:3.5.17-1build2_amd64.deb ...
+Unpacking libxpm4:amd64 (1:3.5.17-1build2) ...
+Selecting previously unselected package libgd3:amd64.
+Preparing to unpack .../10-libgd3_2.3.3-9ubuntu5_amd64.deb ...
+Unpacking libgd3:amd64 (2.3.3-9ubuntu5) ...
+Selecting previously unselected package libmaxminddb0:amd64.
+Preparing to unpack .../11-libmaxminddb0_1.9.1-1build1_amd64.deb ...
+Unpacking libmaxminddb0:amd64 (1.9.1-1build1) ...
+Selecting previously unselected package libxslt1.1:amd64.
+Preparing to unpack .../12-libxslt1.1_1.1.39-0exp1ubuntu0.24.04.2_amd64.deb ...
+Unpacking libxslt1.1:amd64 (1.1.39-0exp1ubuntu0.24.04.2) ...
+Selecting previously unselected package nginx-common.
+Preparing to unpack .../13-nginx-common_1.24.0-2ubuntu7.5_all.deb ...
+Unpacking nginx-common (1.24.0-2ubuntu7.5) ...
+Selecting previously unselected package libnginx-mod-http-geoip2.
+Preparing to unpack .../14-libnginx-mod-http-geoip2_1.24.0-2ubuntu7.5_amd64.deb ...
+Unpacking libnginx-mod-http-geoip2 (1.24.0-2ubuntu7.5) ...
+Selecting previously unselected package libnginx-mod-http-image-filter.
+Preparing to unpack .../15-libnginx-mod-http-image-filter_1.24.0-2ubuntu7.5_amd64.deb ...
+Unpacking libnginx-mod-http-image-filter (1.24.0-2ubuntu7.5) ...
+Selecting previously unselected package libnginx-mod-http-xslt-filter.
+Preparing to unpack .../16-libnginx-mod-http-xslt-filter_1.24.0-2ubuntu7.5_amd64.deb ...
+Unpacking libnginx-mod-http-xslt-filter (1.24.0-2ubuntu7.5) ...
+Selecting previously unselected package libnginx-mod-mail.
+Preparing to unpack .../17-libnginx-mod-mail_1.24.0-2ubuntu7.5_amd64.deb ...
+Unpacking libnginx-mod-mail (1.24.0-2ubuntu7.5) ...
+Selecting previously unselected package libnginx-mod-stream.
+Preparing to unpack .../18-libnginx-mod-stream_1.24.0-2ubuntu7.5_amd64.deb ...
+Unpacking libnginx-mod-stream (1.24.0-2ubuntu7.5) ...
+Selecting previously unselected package libnginx-mod-stream-geoip2.
+Preparing to unpack .../19-libnginx-mod-stream-geoip2_1.24.0-2ubuntu7.5_amd64.deb ...
+Unpacking libnginx-mod-stream-geoip2 (1.24.0-2ubuntu7.5) ...
+Selecting previously unselected package nginx.
+Preparing to unpack .../20-nginx_1.24.0-2ubuntu7.5_amd64.deb ...
+Unpacking nginx (1.24.0-2ubuntu7.5) ...
+Setting up fonts-dejavu-core (2.37-8) ...
+Setting up fontconfig-config (2.15.0-1.1ubuntu2) ...
+Setting up libfontconfig1:amd64 (2.15.0-1.1ubuntu2) ...
+Setting up libjpeg-turbo8:amd64 (2.1.5-2ubuntu2) ...
+Setting up libjpeg8:amd64 (8c-2ubuntu11) ...
+Setting up libjbig0:amd64 (2.1-6.1ubuntu2) ...
+Setting up libdeflate0:amd64 (1.19-1build1.1) ...
+Setting up libwebp7:amd64 (1.3.2-0.4ubuntu0.24.04.2) ...
+Setting up libtiff6:amd64 (4.5.1+git230720-4ubuntu2.4) ...
+Setting up libxpm4:amd64 (1:3.5.17-1build2) ...
+Setting up libgd3:amd64 (2.3.3-9ubuntu5) ...
+Setting up libmaxminddb0:amd64 (1.9.1-1build1) ...
+Setting up libxslt1.1:amd64 (1.1.39-0exp1ubuntu0.24.04.2) ...
+Setting up nginx-common (1.24.0-2ubuntu7.5) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /usr/lib/systemd/system/nginx.service.
+Setting up libnginx-mod-http-geoip2 (1.24.0-2ubuntu7.5) ...
+Setting up libnginx-mod-http-image-filter (1.24.0-2ubuntu7.5) ...
+Setting up libnginx-mod-http-xslt-filter (1.24.0-2ubuntu7.5) ...
+Setting up libnginx-mod-mail (1.24.0-2ubuntu7.5) ...
+Setting up libnginx-mod-stream (1.24.0-2ubuntu7.5) ...
+Setting up libnginx-mod-stream-geoip2 (1.24.0-2ubuntu7.5) ...
+Setting up nginx (1.24.0-2ubuntu7.5) ...
+Processing triggers for ufw (0.36.2-6) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.6) ...
+Scanning processes...
+Scanning linux images...
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+
+--------------------------------------------------------------------------------
+PHẦN 3. Kiểm tra phiên bản, dịch vụ, cổng lắng nghe
+Thời điểm: 02:13 - 02:14 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ nginx -v
+nginx version: nginx/1.24.0 (Ubuntu)
+devops@halo:~$ apt-cache policy nginx
+nginx:
+  Installed: 1.24.0-2ubuntu7.5
+  Candidate: 1.24.0-2ubuntu7.5
+  Version table:
+ *** 1.24.0-2ubuntu7.5 500
+        500 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages
+        500 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages
+        100 /var/lib/dpkg/status
+     1.24.0-2ubuntu7 500
+        500 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages
+devops@halo:~$ systemctl status nginx --no-pager
+* nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2026-10-01 02:13:21 UTC; 24s ago
+       Docs: man:nginx(8)
+    Process: 4127 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+    Process: 4129 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+   Main PID: 4130 (nginx)
+      Tasks: 3 (limit: 2269)
+     Memory: 2.4M (peak: 2.9M)
+        CPU: 21ms
+     CGroup: /system.slice/nginx.service
+             ├─4130 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+             ├─4131 "nginx: worker process"
+             └─4132 "nginx: worker process"
+
+Oct 01 02:13:21 halo systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...
+Oct 01 02:13:21 halo systemd[1]: Started nginx.service - A high performance web server and a reverse proxy server.
+devops@halo:~$ sudo systemctl enable nginx
+Synchronizing state of nginx.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable nginx
+devops@halo:~$ systemctl is-enabled nginx
+enabled
+devops@halo:~$ systemctl is-active nginx
+active
+devops@halo:~$ sudo ss -tlnp | grep :80
+LISTEN 0      511          0.0.0.0:80        0.0.0.0:*    users:(("nginx",pid=4132,fd=5),("nginx",pid=4131,fd=5),("nginx",pid=4130,fd=5))
+LISTEN 0      511             [::]:80           [::]:*    users:(("nginx",pid=4132,fd=6),("nginx",pid=4131,fd=6),("nginx",pid=4130,fd=6))
+devops@halo:~$ sudo ufw status
+Status: inactive
+
+--------------------------------------------------------------------------------
+PHẦN 4. Kiểm tra trang mặc định của Nginx từ máy cá nhân
+Thời điểm: 02:15 UTC | Thực hiện trên: Máy cá nhân (Windows, Git Bash)
+--------------------------------------------------------------------------------
+$ curl -I http://103.116.104.228
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Thu, 01 Oct 2026 02:15:34 GMT
+Content-Type: text/html
+Content-Length: 615
+Last-Modified: Mon, 16 Jun 2025 07:44:19 GMT
+Connection: keep-alive
+ETag: "684fcb53-267"
+Accept-Ranges: bytes
+
+
+--------------------------------------------------------------------------------
+PHẦN 5. Quan sát cấu hình mặc định trước khi thay đổi
+Thời điểm: 02:16 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ ls -l /etc/nginx/sites-enabled/
+total 0
+lrwxrwxrwx 1 root root 34 Oct  1 02:13 default -> /etc/nginx/sites-available/default
+devops@halo:~$ ls -l /etc/nginx/sites-available/
+total 4
+-rw-r--r-- 1 root root 2412 Oct  1 02:13 default
+
+--------------------------------------------------------------------------------
+PHẦN 6. Tạo thư mục gốc và tệp index.html
+Thời điểm: 02:18 - 02:20 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ sudo mkdir -p /var/www/ptit-web/html
+devops@halo:~$ ls -la /var/www/
+total 16
+drwxr-xr-x  4 root root 4096 Oct  1 02:18 .
+drwxr-xr-x 13 root root 4096 Oct  1 02:13 ..
+drwxr-xr-x  2 root root 4096 Oct  1 02:13 html
+drwxr-xr-x  3 root root 4096 Oct  1 02:18 ptit-web
+devops@halo:~$ sudo tee /var/www/ptit-web/html/index.html > /dev/null << 'EOF'
+> <!DOCTYPE html>
+> <html lang="vi">
+> <head>
+>   <meta charset="utf-8">
+>   <meta name="viewport" content="width=device-width, initial-scale=1">
+>   <title>PTIT DevOps Course - Session 02</title>
+>   <style>
+>     body {
+>       margin: 0;
+>       font-family: Arial, Helvetica, sans-serif;
+>       background-color: #f3f5f8;
+>       color: #1f2933;
+>     }
+>     .container {
+>       max-width: 720px;
+>       margin: 12vh auto 0;
+>       padding: 32px 40px;
+>       background-color: #ffffff;
+>       border-top: 6px solid #c8102e;
+>       border-radius: 6px;
+>       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+>     }
+>     h1 {
+>       margin-top: 0;
+>       font-size: 1.8rem;
+>       color: #c8102e;
+>     }
+>     p {
+>       line-height: 1.7;
+>     }
+>     code {
+>       padding: 2px 6px;
+>       background-color: #eef1f5;
+>       border-radius: 3px;
+>       font-size: 0.95em;
+>     }
+>     footer {
+>       margin-top: 28px;
+>       padding-top: 12px;
+>       border-top: 1px solid #d9dee5;
+>       font-size: 0.85rem;
+>       color: #52606d;
+>     }
+>   </style>
+> </head>
+> <body>
+>   <main class="container">
+>     <h1>Welcome to PTIT DevOps Course - Session 02</h1>
+>     <p>
+>       Đây là trang web tĩnh được phục vụ bởi Nginx trên Ubuntu Server 24.04 LTS,
+>       là sản phẩm của Bài 3 thuộc Session 02 trong khóa học DevOps tại Học viện
+>       Công nghệ Bưu chính Viễn thông (PTIT).
+>     </p>
+>     <p>
+>       Nội dung trang nằm tại <code>/var/www/ptit-web/html/index.html</code> và được
+>       truy cập thông qua Server Block <code>ptit-web.conf</code> lắng nghe ở cổng 80.
+>     </p>
+>     <footer>Nginx trên Ubuntu Server &middot; Cổng 80 (HTTP) &middot; Website tĩnh</footer>
+>   </main>
+> </body>
+> </html>
+> EOF
+devops@halo:~$ sudo chown -R www-data:www-data /var/www/ptit-web
+devops@halo:~$ sudo find /var/www/ptit-web -type d -exec chmod 755 {} \;
+devops@halo:~$ sudo find /var/www/ptit-web -type f -exec chmod 644 {} \;
+devops@halo:~$ ls -l /var/www/ptit-web/html/
+total 4
+-rw-r--r-- 1 www-data www-data 1681 Oct  1 02:19 index.html
+devops@halo:~$ file /var/www/ptit-web/html/index.html
+/var/www/ptit-web/html/index.html: HTML document, Unicode text, UTF-8 text
+devops@halo:~$ namei -l /var/www/ptit-web/html/index.html
+f: /var/www/ptit-web/html/index.html
+drwxr-xr-x root     root     /
+drwxr-xr-x root     root     var
+drwxr-xr-x root     root     www
+drwxr-xr-x www-data www-data ptit-web
+drwxr-xr-x www-data www-data html
+-rw-r--r-- www-data www-data index.html
+
+--------------------------------------------------------------------------------
+PHẦN 7. Tạo Server Block /etc/nginx/sites-available/ptit-web.conf
+Thời điểm: 02:23 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ sudo tee /etc/nginx/sites-available/ptit-web.conf > /dev/null << 'EOF'
+> # =============================================================================
+> # Tệp        : /etc/nginx/sites-available/ptit-web.conf
+> # Mục đích   : Server Block phục vụ website tĩnh "PTIT DevOps Course - Session 02"
+> # Môi trường : Ubuntu Server 24.04.3 LTS, Nginx 1.24.0 (repo mặc định của Ubuntu)
+> # Cách dùng  : Tạo symlink sang /etc/nginx/sites-enabled/ để kích hoạt, sau đó
+> #              chạy "sudo nginx -t" và "sudo systemctl reload nginx".
+> # =============================================================================
+>
+> server {
+>     # listen: cổng (và địa chỉ) mà Nginx nhận kết nối HTTP.
+>     #   - "80" là cổng HTTP mặc định, lắng nghe trên mọi địa chỉ IPv4 của máy chủ.
+>     #   - "default_server" biến khối này thành server mặc định của cổng 80: mọi
+>     #     request không khớp server_name nào khác (ví dụ truy cập trực tiếp bằng
+>     #     địa chỉ IP 103.116.104.228) đều được chuyển vào khối này.
+>     listen 80 default_server;
+>
+>     # Tương tự dòng trên nhưng cho IPv6 ("[::]" nghĩa là mọi địa chỉ IPv6).
+>     listen [::]:80 default_server;
+>
+>     # server_name: tên miền mà khối này phục vụ. Hiện chưa có tên miền nên dùng
+>     # "_" (tên không hợp lệ, không trùng với bất kỳ Host nào). Khi truy cập bằng
+>     # IP, header Host chứa IP nên Nginx chọn khối mang cờ default_server.
+>     server_name _;
+>
+>     # root: thư mục gốc chứa mã nguồn website. URI "/foo.html" sẽ được ánh xạ
+>     # thành tệp "<root>/foo.html" trên ổ đĩa.
+>     root /var/www/ptit-web/html;
+>
+>     # index: danh sách tệp được trả về khi người dùng truy cập một thư mục,
+>     # ví dụ truy cập "/" sẽ trả về tệp index.html nằm trong thư mục root.
+>     index index.html;
+>
+>     # access_log: ghi mỗi request (IP client, thời gian, URL, mã trạng thái...).
+>     # error_log : ghi lỗi của khối này (mặc định từ mức "error" trở lên).
+>     # Dùng tệp riêng để dễ tra cứu, không lẫn với log của các site khác.
+>     access_log /var/log/nginx/ptit-web.access.log;
+>     error_log /var/log/nginx/ptit-web.error.log;
+>
+>     # location /: khối xử lý cho mọi đường dẫn bắt đầu bằng "/".
+>     location / {
+>         # try_files: lần lượt thử (1) tệp đúng bằng URI, (2) thư mục đúng bằng
+>         # URI (kèm index), (3) nếu cả hai không tồn tại thì trả về 404 Not Found.
+>         # Đây là cấu hình chuẩn cho website tĩnh.
+>         try_files $uri $uri/ =404;
+>     }
+> }
+> EOF
+devops@halo:~$ ls -l /etc/nginx/sites-available/
+total 8
+-rw-r--r-- 1 root root 2412 Oct  1 02:13 default
+-rw-r--r-- 1 root root 2674 Oct  1 02:23 ptit-web.conf
+
+--------------------------------------------------------------------------------
+PHẦN 8. Kích hoạt site, xử lý xung đột default_server
+Thời điểm: 02:24 - 02:25 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ sudo ln -s /etc/nginx/sites-available/ptit-web.conf /etc/nginx/sites-enabled/
+devops@halo:~$ ls -l /etc/nginx/sites-enabled/
+total 0
+lrwxrwxrwx 1 root root 34 Oct  1 02:13 default -> /etc/nginx/sites-available/default
+lrwxrwxrwx 1 root root 40 Oct  1 02:24 ptit-web.conf -> /etc/nginx/sites-available/ptit-web.conf
+devops@halo:~$ sudo nginx -t
+nginx: [emerg] a duplicate default server for 0.0.0.0:80 in /etc/nginx/sites-enabled/ptit-web.conf:15
+nginx: configuration file /etc/nginx/nginx.conf test failed
+devops@halo:~$ sudo rm /etc/nginx/sites-enabled/default
+devops@halo:~$ ls -l /etc/nginx/sites-enabled/ /etc/nginx/sites-available/
+/etc/nginx/sites-available/:
+total 8
+-rw-r--r-- 1 root root 2412 Oct  1 02:13 default
+-rw-r--r-- 1 root root 2674 Oct  1 02:23 ptit-web.conf
+
+/etc/nginx/sites-enabled/:
+total 0
+lrwxrwxrwx 1 root root 40 Oct  1 02:24 ptit-web.conf -> /etc/nginx/sites-available/ptit-web.conf
+devops@halo:~$ sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+--------------------------------------------------------------------------------
+PHẦN 9. Reload Nginx và xác nhận cấu hình đang chạy
+Thời điểm: 02:26 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ sudo systemctl reload nginx
+devops@halo:~$ sudo systemctl status nginx --no-pager
+* nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2026-10-01 02:13:21 UTC; 12min ago
+       Docs: man:nginx(8)
+    Process: 4127 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+    Process: 4129 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+    Process: 4442 ExecReload=/usr/sbin/nginx -g daemon on; master_process on; -s reload (code=exited, status=0/SUCCESS)
+   Main PID: 4130 (nginx)
+      Tasks: 3 (limit: 2269)
+     Memory: 2.7M (peak: 3.4M)
+        CPU: 38ms
+     CGroup: /system.slice/nginx.service
+             ├─4130 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+             ├─4443 "nginx: worker process"
+             └─4444 "nginx: worker process"
+
+Oct 01 02:13:21 halo systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...
+Oct 01 02:13:21 halo systemd[1]: Started nginx.service - A high performance web server and a reverse proxy server.
+Oct 01 02:26:05 halo systemd[1]: Reloading nginx.service - A high performance web server and a reverse proxy server...
+Oct 01 02:26:05 halo systemd[1]: Reloaded nginx.service - A high performance web server and a reverse proxy server.
+devops@halo:~$ sudo nginx -T 2>/dev/null | grep -E '^\s*(listen|server_name|root)'
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    root /var/www/ptit-web/html;
+
+--------------------------------------------------------------------------------
+PHẦN 10. Kiểm tra từ máy cá nhân bằng curl
+Thời điểm: 02:27 UTC | Thực hiện trên: Máy cá nhân (Windows, Git Bash)
+--------------------------------------------------------------------------------
+$ curl -I http://103.116.104.228
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Thu, 01 Oct 2026 02:27:14 GMT
+Content-Type: text/html
+Content-Length: 1681
+Last-Modified: Thu, 01 Oct 2026 02:19:47 GMT
+Connection: keep-alive
+ETag: "6abdc343-691"
+Accept-Ranges: bytes
+
+$ curl http://103.116.104.228
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PTIT DevOps Course - Session 02</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f3f5f8;
+      color: #1f2933;
+    }
+    .container {
+      max-width: 720px;
+      margin: 12vh auto 0;
+      padding: 32px 40px;
+      background-color: #ffffff;
+      border-top: 6px solid #c8102e;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.8rem;
+      color: #c8102e;
+    }
+    p {
+      line-height: 1.7;
+    }
+    code {
+      padding: 2px 6px;
+      background-color: #eef1f5;
+      border-radius: 3px;
+      font-size: 0.95em;
+    }
+    footer {
+      margin-top: 28px;
+      padding-top: 12px;
+      border-top: 1px solid #d9dee5;
+      font-size: 0.85rem;
+      color: #52606d;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>Welcome to PTIT DevOps Course - Session 02</h1>
+    <p>
+      Đây là trang web tĩnh được phục vụ bởi Nginx trên Ubuntu Server 24.04 LTS,
+      là sản phẩm của Bài 3 thuộc Session 02 trong khóa học DevOps tại Học viện
+      Công nghệ Bưu chính Viễn thông (PTIT).
+    </p>
+    <p>
+      Nội dung trang nằm tại <code>/var/www/ptit-web/html/index.html</code> và được
+      truy cập thông qua Server Block <code>ptit-web.conf</code> lắng nghe ở cổng 80.
+    </p>
+    <footer>Nginx trên Ubuntu Server &middot; Cổng 80 (HTTP) &middot; Website tĩnh</footer>
+  </main>
+</body>
+</html>
+
+--------------------------------------------------------------------------------
+PHẦN 11. Kiểm tra trên trình duyệt và xem log truy cập
+Thời điểm: 02:28 - 02:30 UTC | Thực hiện trên: Trình duyệt Chrome mở http://103.116.104.228, sau đó xem log trên Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ sudo tail -n 3 /var/log/nginx/ptit-web.access.log
+113.161.72.19 - - [01/Oct/2026:02:27:31 +0000] "GET / HTTP/1.1" 200 1681 "-" "curl/8.15.0"
+113.161.72.19 - - [01/Oct/2026:02:28:49 +0000] "GET / HTTP/1.1" 200 1681 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36"
+113.161.72.19 - - [01/Oct/2026:02:28:49 +0000] "GET /favicon.ico HTTP/1.1" 404 162 "http://103.116.104.228/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36"
+devops@halo:~$ sudo ls -l /var/log/nginx/
+total 8
+-rw-r----- 1 www-data adm  89 Oct  1 02:15 access.log
+-rw-r----- 1 www-data adm   0 Oct  1 02:13 error.log
+-rw-r----- 1 www-data adm 594 Oct  1 02:28 ptit-web.access.log
+-rw-r----- 1 www-data adm   0 Oct  1 02:25 ptit-web.error.log
+devops@halo:~$ tail -n 1 /var/log/nginx/ptit-web.access.log
+tail: cannot open '/var/log/nginx/ptit-web.access.log' for reading: Permission denied
+
+--------------------------------------------------------------------------------
+PHẦN 12. Mô phỏng sự cố 1: 403 Forbidden do sai quyền thư mục
+Thời điểm: 02:33 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ sudo chmod 000 /var/www/ptit-web/html
+devops@halo:~$ curl -I http://127.0.0.1
+HTTP/1.1 403 Forbidden
+Server: nginx/1.24.0 (Ubuntu)
+Date: Thu, 01 Oct 2026 02:33:40 GMT
+Content-Type: text/html
+Content-Length: 162
+Connection: keep-alive
+
+devops@halo:~$ sudo tail -n 1 /var/log/nginx/ptit-web.error.log
+2026/10/01 02:33:40 [error] 4443#4443: *6 open() "/var/www/ptit-web/html/index.html" failed (13: Permission denied), client: 127.0.0.1, server: _, request: "HEAD / HTTP/1.1", host: "127.0.0.1"
+devops@halo:~$ sudo chmod 755 /var/www/ptit-web/html
+devops@halo:~$ curl -sI http://127.0.0.1 | head -n 1
+HTTP/1.1 200 OK
+
+--------------------------------------------------------------------------------
+PHẦN 13. Mô phỏng sự cố 2: 404 Not Found do root sai
+Thời điểm: 02:36 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ sudo sed -i 's#root /var/www/ptit-web/html;#root /var/www/ptit-web/htm;#' /etc/nginx/sites-available/ptit-web.conf
+devops@halo:~$ sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+devops@halo:~$ sudo systemctl reload nginx
+devops@halo:~$ curl -I http://127.0.0.1
+HTTP/1.1 404 Not Found
+Server: nginx/1.24.0 (Ubuntu)
+Date: Thu, 01 Oct 2026 02:36:12 GMT
+Content-Type: text/html
+Content-Length: 162
+Connection: keep-alive
+
+devops@halo:~$ sudo tail -n 1 /var/log/nginx/ptit-web.access.log
+127.0.0.1 - - [01/Oct/2026:02:36:12 +0000] "HEAD / HTTP/1.1" 404 0 "-" "curl/8.5.0"
+devops@halo:~$ sudo nginx -T 2>/dev/null | grep -E '^\s*root'
+    root /var/www/ptit-web/htm;
+devops@halo:~$ ls /var/www/ptit-web/
+html
+devops@halo:~$ sudo sed -i 's#root /var/www/ptit-web/htm;#root /var/www/ptit-web/html;#' /etc/nginx/sites-available/ptit-web.conf
+devops@halo:~$ sudo nginx -t && sudo systemctl reload nginx
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+devops@halo:~$ curl -sI http://127.0.0.1 | head -n 1
+HTTP/1.1 200 OK
+
+--------------------------------------------------------------------------------
+PHẦN 14. Mô phỏng sự cố 3: sửa cấu hình nhưng quên reload
+Thời điểm: 02:38 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ sudo sed -i '/^    index index.html;/a\    add_header X-Served-By ptit-web always;' /etc/nginx/sites-available/ptit-web.conf
+devops@halo:~$ sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+devops@halo:~$ curl -sI http://127.0.0.1 | grep -i x-served-by
+devops@halo:~$ echo $?
+1
+devops@halo:~$ sudo systemctl reload nginx
+devops@halo:~$ curl -sI http://127.0.0.1 | grep -i x-served-by
+X-Served-By: ptit-web
+devops@halo:~$ sudo sed -i '/X-Served-By/d' /etc/nginx/sites-available/ptit-web.conf
+devops@halo:~$ sudo nginx -t && sudo systemctl reload nginx
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+devops@halo:~$ curl -sI http://127.0.0.1 | grep -ci x-served-by
+0
+
+--------------------------------------------------------------------------------
+PHẦN 15. Mô phỏng sự cố 4: lỗi cú pháp, reload không báo lỗi
+Thời điểm: 02:41 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops)
+--------------------------------------------------------------------------------
+devops@halo:~$ sudo sed -i 's/^        try_files/        try_file/' /etc/nginx/sites-available/ptit-web.conf
+devops@halo:~$ sudo nginx -t
+nginx: [emerg] unknown directive "try_file" in /etc/nginx/sites-enabled/ptit-web.conf:44
+nginx: configuration file /etc/nginx/nginx.conf test failed
+devops@halo:~$ sudo systemctl reload nginx
+devops@halo:~$ echo $?
+0
+devops@halo:~$ sudo tail -n 1 /var/log/nginx/error.log
+2026/10/01 02:41:07 [emerg] 4130#4130: unknown directive "try_file" in /etc/nginx/sites-enabled/ptit-web.conf:44
+devops@halo:~$ curl -sI http://127.0.0.1 | head -n 1
+HTTP/1.1 200 OK
+devops@halo:~$ sudo sed -i 's/^        try_file /        try_files /' /etc/nginx/sites-available/ptit-web.conf
+devops@halo:~$ sudo nginx -t && sudo systemctl reload nginx
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+--------------------------------------------------------------------------------
+PHẦN 16. Kiểm tra toàn vẹn và kết thúc phiên
+Thời điểm: 02:47 UTC | Thực hiện trên: Máy chủ halo (SSH, user devops) rồi Máy cá nhân (Windows, Git Bash)
+--------------------------------------------------------------------------------
+devops@halo:~$ sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+devops@halo:~$ sudo sha256sum /etc/nginx/sites-available/ptit-web.conf /var/www/ptit-web/html/index.html
+3b019b434fb92f881f852a90a215f4f9197945be910b6cea40a735bca3648c17  /etc/nginx/sites-available/ptit-web.conf
+477c82365cefc507f42158b755751603e8533a809e5a3b299c7ce9ec1bf0e8a0  /var/www/ptit-web/html/index.html
+devops@halo:~$ systemctl is-active nginx
+active
+devops@halo:~$ exit
+logout
+Connection to 103.116.104.228 closed.
+$ cd /d/Rikkei/DevOps/Session2/DevOps-Session2-bai3/homework/session_02/ex3
+$ sha256sum ptit-web.conf index.html
+3b019b434fb92f881f852a90a215f4f9197945be910b6cea40a735bca3648c17 *ptit-web.conf
+477c82365cefc507f42158b755751603e8533a809e5a3b299c7ce9ec1bf0e8a0 *index.html
+$ curl -sI http://103.116.104.228 | head -n 1
+HTTP/1.1 200 OK
+
+================================================================================
+KẾT THÚC LOG
+================================================================================
